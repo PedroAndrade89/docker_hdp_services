@@ -4,12 +4,12 @@ cd docker_hdp_services/
 ```
 
 # Build hbase image, tag it and push it to you docker registry
-
+```
 docker build -t hbase .
 
 docker tag hbase <docker registry>:5000/hbase
 docker push <docker registry>:5000/hbase
-  
+```
   
 # Configure Docker to allow pulling from this insecure registry. 
 
