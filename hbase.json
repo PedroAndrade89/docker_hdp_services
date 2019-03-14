@@ -1,0 +1,100 @@
+{
+  "name": "hbase-app-1",
+  "lifetime": "3600",
+  "version": "2.0.2.3.1.0.0",
+  "artifact": {
+    "id": "pandrade-4:5000/hbase",
+    "type": "DOCKER"
+  },
+  "configuration": {
+    "env": {
+      "HBASE_LOG_DIR": "/var/log/hbase",
+      "HADOOP_HOME": "/usr/hdp/3.1.0.0-78/hadoop"
+    },
+    "properties": {
+      "docker.network": "host"
+    },
+    "files": [
+      {
+        "type": "TEMPLATE",
+        "dest_file": "/etc/hadoop/conf/core-site.xml",
+        "src_file": "core-site.xml"
+      },
+      {
+        "type": "TEMPLATE",
+        "dest_file": "/etc/hadoop/conf/hdfs-site.xml",
+        "src_file": "hdfs-site.xml"
+      },
+      {
+        "type": "XML",
+        "dest_file": "/etc/hbase/conf/hbase-site.xml",
+        "properties": {
+          "hbase.cluster.distributed": "true",
+          "hbase.zookeeper.quorum": "${CLUSTER_ZK_QUORUM}",
+          "hbase.rootdir": "${SERVICE_HDFS_DIR}/hbase",
+          "zookeeper.znode.parent": "${SERVICE_ZK_PATH}",
+          "hbase.master.hostname": "hbasemaster-0.${SERVICE_NAME}.${USER}.${DOMAIN}",
+          "hbase.master.info.port": "16010"
+        }
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "hbasemaster",
+      "number_of_containers": 1,
+      "launch_command": "sleep 15; /usr/hdp/current/hbase-master/bin/hbase master start",
+      "resource": {
+        "cpus": 1,
+        "memory": "1024"
+      },
+      "readiness_check": {
+        "type": "HTTP",
+        "properties": {
+          "url": "http://${THIS_HOST}:16010/master-status"
+        }
+      },
+      "configuration": {
+        "env": {
+          "HBASE_MASTER_OPTS": "-Xmx1024m -Xms512m"
+        }
+      }
+    },
+    {
+      "name": "regionserver",
+      "number_of_containers": 3,
+      "launch_command": "sleep 15; /usr/hdp/current/hbase-regionserver/bin/hbase regionserver start",
+      "resource": {
+        "cpus": 1,
+        "memory": "512"
+      },
+      "configuration": {
+        "files": [
+          {
+            "type": "XML",
+            "dest_file": "/etc/hbase/conf/hbase-site.xml",
+            "properties": {
+              "hbase.regionserver.hostname": "${COMPONENT_INSTANCE_NAME}.${SERVICE_NAME}.${USER}.${DOMAIN}"
+            }
+          }
+        ],
+        "env": {
+          "HBASE_REGIONSERVER_OPTS": "-XX:CMSInitiatingOccupancyFraction=70 -Xmx512m -Xms256m"
+        }
+      }
+    },
+    {
+      "name": "hbaseclient",
+      "number_of_containers": 1,
+      "launch_command": "sleep infinity",
+      "resource": {
+        "cpus": 1,
+        "memory": "512"
+      }
+    }
+  ],
+  "quicklinks": {
+    "HBase Master Status UI": "http://hbasemaster-0.${SERVICE_NAME}.${USER}.${DOMAIN}:16010/master-status"
+  }
+}
+
