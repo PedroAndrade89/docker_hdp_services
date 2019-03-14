@@ -1,7 +1,7 @@
 # docker_hdp_services
-
+```
 cd docker_hdp_services/
-
+```
 
 # Build hbase image, tag it and push it to you docker registry
 
@@ -27,13 +27,14 @@ docker push <docker registry>:5000/hbase
   
 # Copy core-site, hdfs-site.xml to user dir in HDFS
 
+```
 hdfs dfs -copyFromLocal /etc/hadoop/conf/core-site.xml .
 hdfs dfs -copyFromLocal /etc/hadoop/conf/hdfs-site.xml .
-
+```
 
 # Launch the app using the Yarn Services API
-
+```
 yarn app -launch hbase hbase.json
-
+```
 
 
