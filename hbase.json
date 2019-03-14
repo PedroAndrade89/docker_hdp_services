@@ -3,7 +3,7 @@
   "lifetime": "3600",
   "version": "2.0.2.3.1.0.0",
   "artifact": {
-    "id": "pandrade-4:5000/hbase",
+    "id": "<docker_registry>:5000/hbase",
     "type": "DOCKER"
   },
   "configuration": {
