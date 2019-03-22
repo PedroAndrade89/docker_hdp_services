@@ -18,7 +18,9 @@ docker push <docker registry>:5000/hbase
 ```
 {
  "live-restore" : true,
- "insecure-registries" : ["<docker registry>:5000"]
+ "debug": true,
+ "insecure-registries" : ["<docker registry>:5000"],
+ "dns": ["<yarn registry dns ip addr>"]
 }
 ```
 
