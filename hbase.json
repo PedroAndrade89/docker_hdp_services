@@ -1,14 +1,14 @@
 {
-  "name": "hbase-app-1",
-  "lifetime": "3600",
+  "name": "hbase",
+  "lifetime": "10800",
   "version": "2.0.2.3.1.0.0",
   "artifact": {
-    "id": "<docker_registry>:5000/hbase",
+    "id": "pandrade-4:5000/hbase_local",
     "type": "DOCKER"
   },
   "configuration": {
     "env": {
-      "HBASE_LOG_DIR": "/var/log/hbase",
+      "HBASE_LOG_DIR": "var/log/hbase",
       "HADOOP_HOME": "/usr/hdp/3.1.0.0-78/hadoop"
     },
     "properties": {
@@ -63,7 +63,7 @@
     {
       "name": "regionserver",
       "number_of_containers": 3,
-      "launch_command": "sleep 15; /usr/hdp/current/hbase-regionserver/bin/hbase regionserver start",
+      "launch_command": "sleep 15;  /usr/hdp/current/hbase-regionserver/bin/hbase regionserver start",
       "resource": {
         "cpus": 1,
         "memory": "512"
@@ -74,7 +74,15 @@
             "type": "XML",
             "dest_file": "/etc/hbase/conf/hbase-site.xml",
             "properties": {
-              "hbase.regionserver.hostname": "${COMPONENT_INSTANCE_NAME}.${SERVICE_NAME}.${USER}.${DOMAIN}"
+		"hbase.cluster.distributed": "true",
+          	"hbase.zookeeper.quorum": "${CLUSTER_ZK_QUORUM}",
+          	"hbase.rootdir": "${SERVICE_HDFS_DIR}/hbase",
+          	"zookeeper.znode.parent": "${SERVICE_ZK_PATH}",
+          	"hbase.master.hostname": "hbasemaster-0.${SERVICE_NAME}.${USER}.${DOMAIN}",
+          	"hbase.master.info.port": "16010",
+		"hbase.regionserver.info.port": "16020",
+		"hbase.regionserver.port": "16030",
+		"hbase.regionserver.hostname": "${COMPONENT_INSTANCE_NAME}.${SERVICE_NAME}.${USER}.${DOMAIN}"
             }
           }
         ],

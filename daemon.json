@@ -1,0 +1,6 @@
+{
+        "live-restore" : true,
+        "debug" : true ,
+	"insecure-registries": ["pandrade-4:5000"],
+	"dns": ["172.26.81.14"]
+ }
