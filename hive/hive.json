@@ -1,0 +1,104 @@
+{
+  "name": "hive",
+  "lifetime": "-1",
+  "version": "3.1.0.3.1.0.0",
+  "artifact": {
+    "id": "pandrade-4:5000/hive2",
+    "type": "DOCKER"
+  },
+  "configuration": {
+    "env": {
+      "HIVE_LOG_DIR": "var/log/hive",
+      "YARN_CONTAINER_RUNTIME_DOCKER_MOUNTS": "/etc/passwd:/etc/passwd:ro,/etc/group:/etc/group:ro",
+      "HADOOP_HOME": "/usr/hdp/3.1.0.0-78/hadoop"
+    },
+    "properties": {
+      "docker.network": "host"
+    },
+    "files": [
+      {
+        "type": "TEMPLATE",
+        "dest_file": "/etc/hadoop/conf/core-site.xml",
+        "src_file": "core-site.xml"
+      },
+      {
+        "type": "TEMPLATE",
+        "dest_file": "/etc/hadoop/conf/hdfs-site.xml",
+        "src_file": "hdfs-site.xml"
+      },
+      {
+        "type": "XML",
+        "dest_file": "/etc/hive/conf/hive-site.xml",
+        "properties": {
+          "hive.zookeeper.quorum": "${CLUSTER_ZK_QUORUM}",
+          "hive.zookeeper.namespace": "hiveserver2",
+	  "hive.server2.zookeeper.publish.configs": "true",
+	  "hive.server2.support.dynamic.service.discovery": "true",
+	  "hive.support.concurrency": "true",
+	  "hive.metastore.warehouse.dir": "/user/${USER}/warehouse",
+	  "javax.jdo.option.ConnectionUserName": "hive",
+	  "javax.jdo.option.ConnectionPassword": "hive",
+	  "hive.server2.enable.doAs": "false",
+	  "hive.metastore.schema.verification": "true",
+	  "hive.metastore.db.type": "MYSQL",
+	  "ambari.hive.db.schema.name": "hive",
+	  "javax.jdo.option.ConnectionDriverName": "com.mysql.jdbc.Driver",
+	  "javax.jdo.option.ConnectionURL": "jdbc:mysql://pandrade-4.openstacklocal.com:3306/hive?createDatabaseIfNotExist=true",
+	  "hive.metastore.event.db.notification.api.auth" : "false",
+	  "hive.metastore.uris": "thrift://hivemetastore-0.${SERVICE_NAME}.${USER}.${DOMAIN}:9083"
+        }
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "hiveserver2",
+      "number_of_containers": 1,
+      "launch_command": "sleep 25; /usr/hdp/current/hive-server2/bin/hiveserver2",
+      "resource": {
+        "cpus": 1,
+        "memory": "1024"
+      },
+      "configuration": {
+	"files": [
+        {
+          "type": "XML",
+          "dest_file": "/etc/hive/conf/hive-site.xml",
+          "properties": {
+            "hive.server2.thrift.bind.host": "${COMPONENT_INSTANCE_NAME}.${SERVICE_NAME}.${USER}.${DOMAIN}",
+            "hive.server2.thrift.port": "10000",
+            "hive.server2.thrift.http.port": "10001"
+          }
+        }
+	],	
+        "env": {
+          "HADOOP_OPTS": "-Xmx1024m -Xms512m"
+        }
+      }
+    },
+    {
+      "name": "hivemetastore",
+      "number_of_containers": 1,
+      "launch_command": "sleep 5;/usr/hdp/current/hive-metastore/bin/schematool -initSchema -dbType mysql;/usr/hdp/current/hive-metastore/bin/hive --service metastore",
+      "resource": {
+        "cpus": 1,
+        "memory": "1024"
+      },
+      "configuration": {
+        "files": [
+        {
+          "type": "XML",
+          "dest_file": "/etc/hive/conf/hive-site.xml",
+          "properties": {
+            "hive.metastore.uris": "thrift://${COMPONENT_INSTANCE_NAME}.${SERVICE_NAME}.${USER}.${DOMAIN}:9083"
+          }
+        }
+        ],
+        "env": {
+          "HADOOP_OPTS": "-Xmx1024m -Xms512m"
+        }
+      }
+    }
+  ]
+}
+
