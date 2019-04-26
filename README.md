@@ -18,6 +18,8 @@ cd docker_hdp_services/
 
 2. Restart Docker on all nodes.
 
+
+
 # HBASE
 
 ```
@@ -43,6 +45,8 @@ hdfs dfs -copyFromLocal /etc/hadoop/conf/hdfs-site.xml .
 ```
 yarn app -launch hbase hbase.json
 ```
+
+
 
 # HIVE
 
